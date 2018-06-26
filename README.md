@@ -12,6 +12,7 @@ Using these performance values, it is easy to provide long-term statistics.
 
 ### Usage
 
+```
 check_tasmota -u|--url <http://host:port> -a|--attributes <attributes> 
     [ -c|--critical <thresholds> ] [ -w|--warning <thresholds> ] 
     [ -P|--Password ] 
@@ -19,11 +20,15 @@ check_tasmota -u|--url <http://host:port> -a|--attributes <attributes>
     [ -S|--Sensor ] 
     [ -t|--timeout <timeout> ] 
     [ -h|--help ] 
+```
 	
 ### Example
 
+```
 ./check_tasmota.pl --url http://192.168.178.10 -D Power --warning :0 --critical :1
+
 ./check_tasmota.pl --url http://192.168.178.10 -D ENERGY -S Power --warning :5 --critical :10 
+```
 
 Nagios Configuration can be found in folder EXAMPLE
 
