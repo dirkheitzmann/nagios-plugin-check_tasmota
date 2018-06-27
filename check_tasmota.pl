@@ -210,7 +210,7 @@ if (uc($opt_device) eq "POWER") {
             $check_value = $json_response->{'StatusSNS'}->{uc($opt_device)}->{'Temperature'};
             $check_title = "Temperatur";
             $check_probe = "Temperatur";
-		    $check_scale = "°" . $json_response->{'StatusSNS'}->{'TempUnit'};
+		    $check_scale = $json_response->{'StatusSNS'}->{'TempUnit'};
 		}
 		  
 		case "Humidity" { 
@@ -288,8 +288,8 @@ if (uc($opt_device) eq "POWER") {
 
 # Check if scale is an allowed value [[u|m]s % B c}]
 my $check_scale_in_list = 0;
-if ($check_scale eq "°C" ) { $check_scale_in_list = 1; }
-if ($check_scale eq "°K" ) { $check_scale_in_list = 1; }
+if ($check_scale eq "C" ) { $check_scale_in_list = 1; }
+if ($check_scale eq "K" ) { $check_scale_in_list = 1; }
 if ($check_scale eq "A") { $check_scale_in_list = 1; }
 if ($check_scale eq "V") { $check_scale_in_list = 1; }
 if ($check_scale eq "W" ) { $check_scale_in_list = 1; }
