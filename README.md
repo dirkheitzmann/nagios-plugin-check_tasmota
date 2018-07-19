@@ -32,3 +32,8 @@ check_tasmota -u|--url <http://host:port> -a|--attributes <attributes>
 
 Nagios Configuration can be found in folder EXAMPLE
 
+### Release notes
+
+#### 1.1
+
+- Added Power (W) to ENERGY Sensor
