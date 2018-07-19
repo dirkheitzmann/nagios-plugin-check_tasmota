@@ -23,7 +23,7 @@ my $np = Nagios::Plugin->new(
     . "[ -t|--timeout <timeout> ] "
 #    . "[ --ignoressl ] "
     . "[ -h|--help ] ",
-    version => '0.1',
+    version => '1.1',
     blurb   => 'Nagios plugin to check Wifiplugs and attached sensors running Tasmota Firmware',
     extra   => "\nExample: \n"
     . "check_tasmota.pl --url http://192.168.178.10 -U youruser -P yourpassword"
@@ -122,22 +122,22 @@ my $urlp = $np->opts->url .  "/cm?cmnd=COMMAND";
 # Check, if just Power is requested, or an attached sensor
 if (uc($opt_device) eq "POWER") {
     # http://192.168.18.201/cm?cmnd=Power
-	my $cmnd1 = "COMMAND"; 
-	my $cmnd2 = "Power";
-	$urlp =~ s/$cmnd1/$cmnd2/g;
+    my $cmnd1 = "COMMAND"; 
+    my $cmnd2 = "Power";
+    $urlp =~ s/$cmnd1/$cmnd2/g;
 } else {
-	# http://192.168.18.201/cm?cmnd=Status%208
-	my $cmnd1 = "COMMAND" ;
-	my $cmnd2 = "Status%208";
-	$urlp =~ s/$cmnd1/$cmnd2/g;
+    # http://192.168.18.201/cm?cmnd=Status%208
+    my $cmnd1 = "COMMAND" ;
+    my $cmnd2 = "Status%208";
+    $urlp =~ s/$cmnd1/$cmnd2/g;
 }
 
 # Add auth, if Password is set
 my $url = $urlp;
 if ($opt_pass) {
-	my $auth1 = "//";
-	my $auth2 = "//admin:" . $opt_pass . "@";
-	$url = $urlp =~ s/$auth1/$auth2/g;
+    my $auth1 = "//";
+    my $auth2 = "//admin:" . $opt_pass . "@";
+    $url = $urlp =~ s/$auth1/$auth2/g;
 } 
 
 # verbose
@@ -177,10 +177,10 @@ my $check_scale;
 
 if (uc($opt_device) eq "POWER") {
 
-	## Just gettin Power stats
+    ## Just gettin Power stats
     if ($np->opts->verbose) { print "Verbose: Parsing power state \n"};
-	
-	$check_value_tmp = $json_response->{'POWER'};
+    
+    $check_value_tmp = $json_response->{'POWER'};
     if ($check_value_tmp eq "ON")
       { $check_value = 1  }
     elsif ($check_value_tmp eq "OFF")
@@ -192,98 +192,107 @@ if (uc($opt_device) eq "POWER") {
     $check_probe = "OnOff";
     $check_scale = "";
 
-	if ($np->opts->verbose) { 
-		print "Verbose: Result for power state " . $check_value_tmp . "\n";
-		print "Verbose:                returns " . $check_value . "\n";
-		print "#----\n";
-	}
+    if ($np->opts->verbose) { 
+        print "Verbose: Result for power state " . $check_value_tmp . "\n";
+        print "Verbose:                returns " . $check_value . "\n";
+        print "#----\n";
+    }
     
 } else {
- 	
-	switch ($opt_sensor) {
-	
-		### AM2301, ...
-		case "Temperature" { 
+    
+    switch ($opt_sensor) {
+    
+        ### AM2301, ...
+        case "Temperature" { 
             ## Sensor - Temperature
-			if ($np->opts->verbose) { print "Verbose: Parsing Sensor " . $opt_device ." for " . $opt_sensor ."\n#----\n"};
+            if ($np->opts->verbose) { print "Verbose: Parsing Sensor " . $opt_device ." for " . $opt_sensor ."\n#----\n"};
  
             $check_value = $json_response->{'StatusSNS'}->{uc($opt_device)}->{'Temperature'};
             $check_title = "Temperatur";
             $check_probe = "Temperatur";
-		    $check_scale = $json_response->{'StatusSNS'}->{'TempUnit'};
-		}
-		  
-		case "Humidity" { 
+            $check_scale = $json_response->{'StatusSNS'}->{'TempUnit'};
+        }
+          
+        case "Humidity" { 
             ## Sensor - Humidity
-			if ($np->opts->verbose) { print "Verbose: Parsing Sensor " . $opt_device ." for " . $opt_sensor ."\n#----\n"};
+            if ($np->opts->verbose) { print "Verbose: Parsing Sensor " . $opt_device ." for " . $opt_sensor ."\n#----\n"};
  
             $check_value = $json_response->{'StatusSNS'}->{uc($opt_device)}->{'Humidity'};
             $check_title = "Humidity";
             $check_probe = "Humidity";
-		    $check_scale = "%";
-		}
+            $check_scale = "%";
+        }
 
-		
-		### POW - ENERGY
-		# "StatusSNS":{"Time":"2018-05-12T19:04:19",
-		#              "ENERGY":{"Total":0.000,"Yesterday":0.000,"Today":0.000,"Power":0,"Factor":0.00,"Voltage":230,"Current":0.000}
-		#             }
-		case "Total" { 
+        
+        ### POW - ENERGY
+        # "StatusSNS":{"Time":"2018-05-12T19:04:19",
+        #              "ENERGY":{"Total":0.000,"Yesterday":0.000,"Today":0.000,"Power":0,"Factor":0.00,"Voltage":230,"Current":0.000}
+        #             }
+        case "Power" { 
             ## ENERGY - Total
-			if ($np->opts->verbose) { print "Verbose: Parsing Sensor " . $opt_device ." for " . $opt_sensor ."\n#----\n"};
+            if ($np->opts->verbose) { print "Verbose: Parsing Sensor " . $opt_device ." for " . $opt_sensor ."\n#----\n"};
+ 
+            $check_value = $json_response->{'StatusSNS'}->{uc($opt_device)}->{'Power'};
+            $check_title = "Power";
+            $check_probe = "Power";
+            $check_scale = "W";
+        }
+        case "Total" { 
+            ## ENERGY - Total
+            if ($np->opts->verbose) { print "Verbose: Parsing Sensor " . $opt_device ." for " . $opt_sensor ."\n#----\n"};
  
             $check_value = $json_response->{'StatusSNS'}->{uc($opt_device)}->{'Total'};
             $check_title = "Energy total";
             $check_probe = "Energy total";
-		    $check_scale = "kWh";
-		}
-		case "Yesterday" { 
+            $check_scale = "kWh";
+        }
+        case "Yesterday" { 
             ## ENERGY - Yesterday
-			if ($np->opts->verbose) { print "Verbose: Parsing Sensor " . $opt_device ." for " . $opt_sensor ."\n#----\n"};
+            if ($np->opts->verbose) { print "Verbose: Parsing Sensor " . $opt_device ." for " . $opt_sensor ."\n#----\n"};
  
             $check_value = $json_response->{'StatusSNS'}->{uc($opt_device)}->{'Yesterday'};
             $check_title = "Energy Yesterday";
             $check_probe = "Energy Yesterday";
-		    $check_scale = "kWh";
-		}
-		case "Today" { 
+            $check_scale = "kWh";
+        }
+        case "Today" { 
             ## ENERGY - Today
-			if ($np->opts->verbose) { print "Verbose: Parsing Sensor " . $opt_device ." for " . $opt_sensor ."\n#----\n"};
+            if ($np->opts->verbose) { print "Verbose: Parsing Sensor " . $opt_device ." for " . $opt_sensor ."\n#----\n"};
  
             $check_value = $json_response->{'StatusSNS'}->{uc($opt_device)}->{'Today'};
             $check_title = "Energy Today";
             $check_probe = "Energy Today";
-		    $check_scale = "kWh";
-		}
-		case "Voltage" { 
+            $check_scale = "kWh";
+        }
+        case "Voltage" { 
             ## ENERGY - Voltage
-			if ($np->opts->verbose) { print "Verbose: Parsing Sensor " . $opt_device ." for " . $opt_sensor ."\n#----\n"};
+            if ($np->opts->verbose) { print "Verbose: Parsing Sensor " . $opt_device ." for " . $opt_sensor ."\n#----\n"};
  
             $check_value = $json_response->{'StatusSNS'}->{uc($opt_device)}->{'Voltage'};
             $check_title = "Voltage";
             $check_probe = "Voltage";
-		    $check_scale = "V";
-		}
-		case "Current" { 
+            $check_scale = "V";
+        }
+        case "Current" { 
             ## ENERGY - Current
-			if ($np->opts->verbose) { print "Verbose: Parsing Sensor " . $opt_device ." for " . $opt_sensor ."\n#----\n"};
+            if ($np->opts->verbose) { print "Verbose: Parsing Sensor " . $opt_device ." for " . $opt_sensor ."\n#----\n"};
  
             $check_value = $json_response->{'StatusSNS'}->{uc($opt_device)}->{'Current'};
             $check_title = "Current";
             $check_probe = "Current";
-		    $check_scale = "A";
-		}
+            $check_scale = "A";
+        }
 
-		
-		### not implemented
-		else { 
-			if ($np->opts->verbose) { print "Verbose: Parsing Sensor " . $opt_sensor . " on SensorDevice " . $opt_device ."\n#----\n"};
-			$check_value = -1;
-			$check_title = "Sensor " . $opt_sensor . " on SensorDevice " . $opt_device . " is not supported";
-			$check_probe = "Sensor " . $opt_sensor . " on SensorDevice " . $opt_device . " is not supported";
-			$check_scale = "";
+        
+        ### not implemented
+        else { 
+            if ($np->opts->verbose) { print "Verbose: Parsing Sensor " . $opt_sensor . " on SensorDevice " . $opt_device ."\n#----\n"};
+            $check_value = -1;
+            $check_title = "Sensor " . $opt_sensor . " on SensorDevice " . $opt_device . " is not supported";
+            $check_probe = "Sensor " . $opt_sensor . " on SensorDevice " . $opt_device . " is not supported";
+            $check_scale = "";
           }
-	}
+    }
 }
 
 # Check if scale is an allowed value [[u|m]s % B c}]
@@ -305,11 +314,11 @@ $result = $np->check_threshold(
  );
 
 if ($np->opts->verbose) { 
-	print "Verbose: Value $check_value "; 
-	print "\n         Scale $check_scale"; 
-	print "\n         Title $check_title"; 
-	print "\n         Probe $check_probe"; 
-	print "\n#----\n"
+    print "Verbose: Value $check_value "; 
+    print "\n         Scale $check_scale"; 
+    print "\n         Title $check_title"; 
+    print "\n         Probe $check_probe"; 
+    print "\n#----\n"
 };
 
 
@@ -318,20 +327,20 @@ if ($np->opts->verbose) {
 my @statusmsg;
 
 if ($check_scale_in_list eq 1) {
-	push(@statusmsg, "$check_probe: ".$check_value.$check_scale);
-	$np->add_perfdata(
-		label => $check_title,
-		value => $check_value,
-		uom => $check_scale, 
-		threshold => $np->set_thresholds( warning => $np->opts->warning, critical => $np->opts->critical),
-	); 
+    push(@statusmsg, "$check_probe: ".$check_value.$check_scale);
+    $np->add_perfdata(
+        label => $check_title,
+        value => $check_value,
+        uom => $check_scale, 
+        threshold => $np->set_thresholds( warning => $np->opts->warning, critical => $np->opts->critical),
+    ); 
 } else {
-	push(@statusmsg, "$check_probe: ".$check_value);
-	$np->add_perfdata(
-		label => $check_title . "(" . $check_scale . ")",
-		value => $check_value,
-		threshold => $np->set_thresholds( warning => $np->opts->warning, critical => $np->opts->critical),
-	); 
+    push(@statusmsg, "$check_probe: ".$check_value);
+    $np->add_perfdata(
+        label => $check_title . "(" . $check_scale . ")",
+        value => $check_value,
+        threshold => $np->set_thresholds( warning => $np->opts->warning, critical => $np->opts->critical),
+    ); 
 };
 
 if ($np->opts->verbose) { print "Verbose: StatusMsg"; print Dumper (@statusmsg);  print "#----\n"};
